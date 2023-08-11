@@ -1,0 +1,32 @@
+@skeleton {
+	<div class="column" style="float: right; width: max-content;">
+		<div ref="notification" class="notification" style="display: none;"></div>
+		<a href="basket" class="centering column">
+			<span style="font-size: 24pt;">🧺</span>
+			<p>Warenkorb →</p>
+		</a>
+	</div>
+}
+
+@client slowUpdate() {
+	let basketItemCount = Object.values(basket.get()).reduce((acc, curr) => acc + curr, 0);
+	if (basketItemCount > 0) {
+		this.notification.style = '';
+		this.notification.innerText = basketItemCount;
+	} else {
+		this.notification.style = 'display: none;';
+	}
+}
+
+@style {
+	.notification {
+		float: right;
+		position: absolute;
+		background-color: #b54301;
+		font-weight: bold;
+		color: #fff;
+		border-radius: 999px;
+		padding: 2px 0.5rem;
+		font-size: 9pt;
+	}
+}

@@ -1,0 +1,137 @@
+@using localData;
+@using currencies;
+
+@skeleton {
+	<div ref="content"></div>
+}
+
+@client load() {
+	localData.setCookiesAllowed(true);
+	currencies.set();
+
+	routing.on('products', async () => {
+		await getNamespace('productsView');
+		rendering.instantiate(productsView, this.content);
+	});
+
+	routing.on('product', async (par={}) => {
+		if (par.id) {
+			await getNamespace('productView');
+			rendering.instantiate(productView, this.content, {id: par.id});
+		}
+	});
+
+	routing.on('basket', async () => {
+		await getNamespace('basketView');
+		rendering.instantiate(basketView, this.content);
+	});
+
+	routing.on('admin', async (par={}) => {
+		if (par.key) {
+			await getProtectedNamespace('adminView', par.key);
+			rendering.instantiate(adminView, this.content);
+		}
+	});
+
+	routing.init('products');
+
+	setInterval(() => {
+		components.forEach(c => {
+			if (c && c.slowUpdate) c.slowUpdate();
+		});
+	}, 500);
+}
+
+@style {
+	* {
+		font-family: Arial, Helvetica, sans-serif;
+		font-style: normal;
+		font-weight: 200;
+		letter-spacing: 0;
+		padding: 0;
+		margin: 0;
+		border: none;
+		outline: none;
+		text-decoration: none;
+		color: #000;
+	}
+
+	a:hover {
+		text-decoration: underline;
+	}
+
+	button {
+		border: none;
+		background: #4397bf;
+		cursor: pointer;
+		color: #fff;
+		font-weight: bold;
+	}
+
+	button.red {
+		background-color: #952200;
+	}
+
+	button.action {
+		font-size: 11pt;
+		font-weight: bold;
+		background-color: #abe52c;
+		color: #000;
+	}
+
+	input, button, textarea, select {
+		box-shadow: 0 0 4px #0004;
+		padding: 8px;
+		border-radius: 2px;
+	}
+
+	.cmp {
+		width: min-content;
+	}
+
+	.row, .flex {
+		display: flex;
+		flex-direction: row;
+		gap: 4px;
+	}
+	
+	.row.centering, .flex.centering, .column.centering {
+		align-items: center;
+	}
+
+	.flex {
+		flex-wrap: wrap;
+	}
+
+	.flex > p, .row > p {
+		margin: 0 auto;
+	}
+
+	.column {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.large {
+		gap: 8px;
+	}
+
+	.page {
+		padding: 2rem;
+	}
+
+	img.prev-small {
+		width: 120px;
+		height: 120px;
+	}
+
+	.price {
+		font-size: 11pt;
+		font-weight: light;
+		hover: left;
+		background-color: #81839938;
+		padding: 4px;
+		border-radius: 2px;
+	}
+}

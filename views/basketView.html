@@ -1,0 +1,63 @@
+@using basket;
+@using currencies;
+
+@client async load() {
+	let amounts = basket.get();
+
+	let products = await callServer('basket_getProducts', {productIDs: Object.keys(amounts)});
+
+	products = products.map(product => {
+		product.amount = amounts[product.id];
+		return product;
+	});
+
+	rendering.changeHTML(this, this, `
+	<div class="page column">
+		<h1>Warenkorb</h1>
+		<div class="column" style="float: right; width: max-content;">
+			<a href="products" class="centering column">
+				<span style="font-size: 24pt;">📦</span>
+				<p>← Produkte</p>
+			</a>
+		</div>
+		@if (products.length > 0) {
+			<div class="flex">
+				<button class="red" onclick="basket.clear(); @this.rerender();">❌ leeren</button>
+			</div>
+			@for (product in products) {
+				<div comp="basketItem" product='${JSON.stringify(product)}' rerender="@this.rerender();"></div>
+			}
+			<div class="centering row">
+				<div class="price" style="font-weight: bold; padding: 8px;">${currencies.format(products.reduce((acc, curr) => acc + curr.price * curr.amount, 0))}</div>
+				<button class="green">Zur Kasse →</button>
+			</div>
+		} else {
+			<div style="font-size: 16pt;">leerer Warenkorb</div>
+		}
+	</div>
+	`);
+}
+
+@client rerender() {
+	rendering.instantiate(basketView, this);
+}
+
+@server basket_getProducts({productIDs}, {storage}) {
+	return productIDs.map(productID => {
+		let prod = storage.load('products', productID);
+		product = {
+			id: prod.id,
+			price: prod.price,
+			materials: prod.materials,
+			brand: prod.brand,
+			name: prod.name,
+		}
+	
+		let image = storage.load('product_images', prod.id);
+		if (image) {
+			product.image = image.image;
+		}
+	
+		return product;
+	});
+}

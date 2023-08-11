@@ -1,0 +1,20 @@
+@using basket;
+
+@skeleton {
+	<div class="row">
+		<input ref="amountField" type="number" style="width: 2rem;" step="1" min="1" value="1" onblur="this.value = Math.round(this.value)">
+		<button ref="addButton" class="action" onclick="@this.addToBasket();">🧺 in den Warenkorb ›</button>
+		<p></p>
+	</div>
+}
+
+@client addToBasket() {
+	if (this.productID) {
+		basket.add(this.productID, Math.round(this.amountField.value * 1));
+		this.amountField.value = 1;
+		this.addButton.innerText = '✔️';
+		setTimeout(() => {
+			this.addButton.innerText = '🧺 in den Warenkorb ›';
+		}, 800);
+	}
+}

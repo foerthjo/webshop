@@ -1,0 +1,37 @@
+@skeleton {
+	<div class="page">
+		<h1>Tobi's Ersatzteile: Admin Suite</h1>
+
+		<div class="even-split">
+			<div class="column">
+				<h2>products</h2>
+				<h3>add product</h3>
+				<form class="column" onsubmit="console.log('submitting form');">
+					<input type="text" placeholder="product name">
+					<input type="text" placeholder="product brand">
+					<button type="submit">add product to product list</button>
+				</form>
+
+				<h3>product list</h3>
+				<div ref="productList"></div>
+			</div>
+
+			<div class="column">
+				<h2>orders</h2>
+				<h3>settings</h3>
+				<h3>orders in progress</h3>
+			</div>
+		</div>
+	</div>
+}
+
+@style {
+	.even-split {
+		width: 100%;
+		display: grid;
+		grid-template-rows: 1fr;
+		grid-template-columns: repeat(auto-fill, calc(50% - 4px));
+		grid-row-gap: 8px;
+		grid-column-gap: 8px;
+	}
+}

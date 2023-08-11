@@ -1,0 +1,92 @@
+@skeleton {
+	<div class="page column">
+		<h1>Tobi's Ersatzteile</h1>
+		<div comp="basketLink"></div>
+		<label>sortieren nach:
+			<select ref="sortOrder" oninput="@this.sortProducts(); @this.renderProducts();">
+				<option value="search">Suchworte, passendste zuerst</option>
+				<option value="price_inc">Preis, niedrigster zuerst</option>
+				<option value="price_dec">Preis, höchster zuerst</option>
+				<option value="name">Name, alphabetisch</option>
+				<option value="brand">Marke, alphabetisch</option>
+				<option value="materials_dec">Materialanzahl, höchste zuerst</option>
+				<option value="materials_inc">Materialanzahl, niedrigste zuerst</option>
+			</select>
+		</label>
+		<input ref="searchField" placeholder="🔭 Suche" oninput="@this.filterProducts(); @this.sortProducts(); @this.renderProducts();">
+		<div class="product-grid" ref="productsDisplay"></div>
+	</div>
+}
+
+@client async load() {
+	this.allProducts = await callServer('products_get');
+	this.filterProducts();
+	this.sortProducts();
+	this.renderProducts();
+}
+
+@client filterProducts() {
+	if (this.searchField.value == '') {
+		this.products = this.allProducts;
+		return;
+	}
+
+	let searchWords = this.searchField.value.toLowerCase().split(' ').filter(word => word.length > 0);
+
+	let searchResults = this.allProducts.map(prod => {
+		let result = {product: prod};
+		let occurrences = 0;
+		searchWords.forEach(word => {
+			if (prod.name.toLowerCase().includes(word)) occurrences++;
+			if (prod.brand.toLowerCase().includes(word)) occurrences++;
+			if (prod.materials.join(' ').toLowerCase().includes(word)) occurrences++;
+		});
+		result.occurrences = occurrences;
+		return result;
+	});
+
+	this.products = searchResults.filter(result => result.occurrences > 0).sort((a, b) => b.occurrences - a.occurrences).map(result => result.product);
+}
+
+@client sortProducts() {
+	if (this.sortOrder.value == 'price_inc') this.products.sort((a, b) => a.price - b.price);
+	if (this.sortOrder.value == 'price_dec') this.products.sort((a, b) => b.price - a.price);
+	if (this.sortOrder.value == 'name') this.products.sort((a, b) => a.name < b.name ? -1 : b.name < a.name ? 1 : 0);
+	if (this.sortOrder.value == 'brand') this.products.sort((a, b) => a.brand < b.brand ? -1 : b.brand < a.brand ? 1 : 0);
+	if (this.sortOrder.value == 'materials_dec') this.products.sort((a, b) => b.materials.length - a.materials.length);
+	if (this.sortOrder.value == 'materials_inc') this.products.sort((a, b) => a.materials.length - b.materials.length);
+}
+
+@client renderProducts() {
+	rendering.changeHTML(this, this.productsDisplay, this.products.map(product => `
+	<div comp="productDisplay" class="product-display" product='${JSON.stringify(product)}'></div>
+	`).join(''));
+}
+
+@server products_get(p, {storage}) {
+	return storage.loadAll('products').map(prod => {
+		let product = {
+			id: prod.id,
+			price: prod.price,
+			materials: prod.materials,
+			brand: prod.brand,
+			name: prod.name,
+		}
+
+		let image = storage.load('product_images', prod.id);
+		if (image) {
+			product.image = image.image;
+		}
+
+		return product;
+	});
+}
+
+@style {
+	.product-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, 256px);
+		grid-auto-rows: auto;
+		gap: 8px;
+	}
+}

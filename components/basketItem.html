@@ -1,0 +1,22 @@
+@using currencies;
+
+@client async load() {
+	let product = JSON.parse(this.getAttribute('product'));
+
+	rendering.changeHTML(this, this, `
+	<div class="flex">
+		<img class="prev-small">
+		<div class="column">
+			<p>@{product.brand} @{product.name}</p>
+			<div class="centering row">
+				<input ref="amountField" type="number" style="width: 2rem;" step="1" min="1" value="${product.amount}" onchange="this.value = Math.max(1, Math.round(this.value)); basket.set('${product.id}', this.value); eval(@this.getAttribute('rerender'));">
+				<button class="red" onclick="basket.remove('${product.id}'); eval(@this.getAttribute('rerender'));">❌ entfernen</button>
+				<p></p>
+			</div>
+			<div class="row">
+				<div class="price">${product.amount} × ${currencies.format(product.price)} = ${currencies.format(product.amount * product.price)}</div>
+			</div>
+		</div>
+	</div>
+	`);
+}

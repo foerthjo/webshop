@@ -1,0 +1,46 @@
+@using currencies;
+
+@skeleton {
+	<a class="column" ref="link">
+		<img>
+		<p class="name" ref="nameDisplay"></p>
+	</a>
+	<div class="row">
+		<p></p>
+		<div class="price" var="price">/</div>
+	</div>
+	<p ref="materialsDisplay"></p>
+	<p style="margin-top: 1rem; margin-bottom: 1rem;">
+		Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolorum maiores alias incidunt illum ipsum, sed corporis adipisci vero enim praesentium maxime nobis dignissimos quasi dolore minima. Nihil cumque perspiciatis optio.
+	</p>
+	<div comp="addToBasket" ref="addToBasketButton"></div>
+}
+
+@client async load() {
+	let product = JSON.parse(this.getAttribute('product'));
+	this.addToBasketButton.productID = product.id;
+	this.nameDisplay.innerText = `${product.brand} ${product.name}`;
+	this.link.setAttribute('href', `product#id=${product.id}`);
+	this.price = currencies.format(product.price);
+	this.materialsDisplay.innerText = product.materials.join(', ');
+}
+
+@style {
+	.product-display {
+		background: none;
+		border-radius: 2px;
+		box-shadow: 0 0 4px #0004;
+		padding: 8px;
+		width: min-content;
+	}
+
+	.product-display img {
+		width: 240px;
+		height: 240px;
+	}
+
+	.product-display .name {
+		font-size: 14pt;
+		font-weight: bold;
+	}
+}

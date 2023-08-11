@@ -1,0 +1,45 @@
+@using currencies;
+
+@skeleton {
+	<div class="page">
+		<h1 class="name" ref="nameDisplay"></h1>
+		<div class="flex">
+			<a href="products">← Produkte</a>
+		</div>
+		<div class="row">
+			<img style="width: 50%; aspect-ratio: 1;">
+			<div class="column">
+				<p style="margin-bottom: 1rem;">
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolorum maiores alias incidunt illum ipsum, sed corporis adipisci vero enim praesentium maxime nobis dignissimos quasi dolore minima. Nihil cumque perspiciatis optio.
+				</p>
+				<p ref="materialsDisplay"></p>
+				<div class="price" var="price">/</div>
+				<div comp="addToBasket" ref="addToBasketButton"></div>
+			</div>
+		</div>
+	</div>
+}
+
+@client async load({id}) {
+	this.addToBasketButton.productID = id;
+
+	let product = await callServer('product_get', {productID: id});
+
+	this.nameDisplay.innerText = `${product.brand} ${product.name}`;
+	this.price = currencies.format(product.price);
+	this.materialsDisplay.innerText = product.materials.join(', ');
+}
+
+@server product_get({productID}, {storage}) {
+	let prod = storage.load('products', productID);
+
+	let product = {
+		id: prod.id,
+		price: prod.price,
+		materials: prod.materials,
+		brand: prod.brand,
+		name: prod.name,
+	}
+
+	return product;
+}
